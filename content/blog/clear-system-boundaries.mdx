@@ -1,0 +1,99 @@
+Choosing a framework is concrete and satisfying. Deciding where a business rule belongs is less visible, but it often has a larger effect on how the product changes over time.
+
+Start with the responsibilities that need to stay clear. The deployment topology can follow.
+
+## Three useful boundaries
+
+**The interface** translates a user's intention into a request and presents the result. It handles interaction, accessible feedback, and view state.
+
+**The application** decides what that intention means. It validates the business operation, coordinates dependencies, and records the outcome.
+
+**The infrastructure** provides storage, external APIs, scheduling, and delivery. It implements the mechanisms the application needs.
+
+These boundaries can live in a single process. They do not require microservices.
+
+## Follow one operation end to end
+
+Consider an enterprise inquiry on a studio website:
+
+```text
+React form
+  → same-origin website endpoint
+  → Java application validation
+  → database persistence
+  → confirmed response to the visitor
+```
+
+The browser should never receive the database service credential. The application should not report success until storage confirms the write. The interface should preserve the visitor's input when the request fails.
+
+The boundaries make those responsibilities reviewable.
+
+## Extract services when the pressure is real
+
+A separate service adds a network hop, deployment configuration, failure modes, and operational overhead. It earns that cost when independent scaling, security isolation, team ownership, or a distinct runtime requirement justifies it.
+
+Document that reason. “We may need it later” is difficult to test; “this event processor has an independent throughput and retry profile” is a concrete constraint.
+
+## Keep decisions near the code
+
+Record the context, chosen approach, tradeoffs, and conditions that would trigger a review. A short architecture decision record can be more useful than a large diagram that nobody updates.
+
+The goal is not maximum separation. It is enough clarity that the next engineer can safely change the system.
+
+## Apply the boundaries to a concrete operation
+
+Consider the enterprise inquiry workflow used by a studio website. The browser collects contact information and project context. A same-origin endpoint validates the shape of the submission and forwards it to an application service. The service authenticates the caller, validates the operation, and persists the inquiry.
+
+Each layer has a different reason to exist:
+
+- The interface helps the person provide useful information and recover from a failed attempt.
+- The website endpoint keeps the browser interaction within a controlled origin and keeps server credentials out of client code.
+- The application service owns the persistence operation and the relevant server-side rules.
+- The database enforces the durable record structure and access boundary.
+
+Some products can combine the endpoint and application service in one process. Others need separate runtimes or ownership. The separation is justified by the constraint it solves, not by the appearance of a larger architecture diagram.
+
+## Distinguish validation from authorization
+
+Validation asks whether the input satisfies the operation’s contract. Authorization asks whether the actor is allowed to perform that operation. A perfectly shaped request can still be unauthorized, and an authorized actor can still submit invalid data.
+
+For example, an administrator may be allowed to change an inquiry’s status but not silently rewrite the original brief. A public visitor may submit an inquiry but must not read other submissions. The user interface can make these differences understandable, while the server and database enforce them.
+
+Write tests for the denied operation as well as the accepted one. If a permission depends only on a hidden button, someone calling the endpoint directly has bypassed the supposed boundary.
+
+## Decide what a successful response establishes
+
+A response should communicate the state the application can actually confirm. If storage accepted an inquiry and the server returned confirmation, the visitor has evidence that the operation completed. If the connection failed before confirmation arrived, the caller may have an uncertain outcome rather than proof that nothing was stored.
+
+For operations where repeated submission has meaningful consequences, consider an idempotency contract. A stable request identity can allow a retry to recover the previous result instead of creating another independent operation. The right identity, retention, and conflict rules depend on the business operation.
+
+This distinction is especially important when an application changes an external system. A timeout does not automatically reverse that system’s state. The architecture needs a way to reconcile what was intended with what can be observed.
+
+## Keep error handling aligned to the boundary
+
+The browser needs a useful next action and a reference that support can trace. Operators need to distinguish configuration, identity, validation, dependency, and persistence failures. Neither audience needs private credentials copied into an error message.
+
+A correlation identifier can connect the website request to the application service and storage attempt. Log the stage, relevant status or bounded diagnostic code, and timing where useful. Avoid logging entire request bodies or upstream error text that might contain submitted records.
+
+This makes a generic public error compatible with meaningful internal diagnostics. “Service unavailable” can remain safe for the visitor while server logs explain which dependency rejected the operation.
+
+## Record an architecture decision in a form people will use
+
+A short decision record can contain the following:
+
+```text
+Context
+  Which workflow and constraints require a decision?
+Options
+  Which realistic alternatives were considered?
+Decision
+  Which responsibility goes in which component?
+Consequences
+  What new failure modes or operating costs follow?
+Review trigger
+  What change would make this decision worth revisiting?
+```
+
+For a separate Java service, the consequence might include another deployment and a server-to-server authentication contract. The review trigger might be a change in team ownership or an operating requirement. For a single-process application, the tradeoff might be simpler deployment with less runtime isolation.
+
+Neither choice is automatically the more mature one. The useful architecture is the one whose boundaries, costs, and recovery behavior remain clear as the product changes.

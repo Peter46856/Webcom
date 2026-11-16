@@ -1,0 +1,160 @@
+.pricing-intro {
+  max-width: 850px;
+  margin-bottom: 44px;
+  display: grid;
+  gap: 20px;
+}
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.pricing-package {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-radius: 12px;
+  min-width: 0;
+}
+.pricing-package h2 {
+  font-size: 30px;
+}
+.pricing-package h3 {
+  font-size: 17px;
+  letter-spacing: 0;
+}
+.package-price {
+  padding: 20px 0;
+  border-block: 1px solid var(--line);
+  display: grid;
+  gap: 5px;
+}
+.package-price strong {
+  font-family: var(--heading);
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 500;
+}
+.package-price span,
+.package-timeline {
+  color: var(--muted);
+  font-size: 14px;
+}
+.pricing-package ul {
+  padding: 0;
+  margin: 0 0 12px;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+.pricing-package li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.pricing-package li svg {
+  flex-shrink: 0;
+  margin-top: 5px;
+  color: var(--cyan);
+}
+.pricing-package .package-exclusions {
+  color: var(--muted);
+  font-size: 14px;
+}
+.pricing-package .button {
+  margin-top: auto;
+  align-self: flex-start;
+  white-space: normal;
+}
+.pricing-explainer > h2 {
+  margin-bottom: 28px;
+  max-width: 800px;
+}
+.pricing-drivers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+.pricing-drivers h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+.pricing-explainer details {
+  border-top: 1px solid var(--line);
+  padding: 22px 0;
+}
+.pricing-explainer summary {
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+}
+.pricing-explainer details p {
+  max-width: 800px;
+  margin-top: 16px;
+}
+.pricing-explainer a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.package-admin-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+.package-admin-list h2 {
+  font-size: 24px;
+}
+.package-admin-actions,
+.pricing-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.pricing-form-row > label {
+  flex: 1;
+  min-width: 180px;
+}
+.project-admin-form select {
+  padding: 12px;
+  background: var(--canvas);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.project-admin-form .pricing-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.project-admin-form .pricing-checkbox input {
+  width: auto;
+}
+.notification-config {
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  background: var(--surface);
+}
+.notification-config h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+.notification-config p {
+  margin: 8px 0;
+}
+@media (max-width: 700px) {
+  .pricing-grid,
+  .pricing-drivers {
+    grid-template-columns: 1fr;
+  }
+  .pricing-package {
+    padding: 24px;
+  }
+  .package-admin-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

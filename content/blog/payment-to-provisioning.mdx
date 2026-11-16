@@ -1,0 +1,111 @@
+A payment and an internet connection are separate facts. A subscriber can have a confirmed payment while a router is unreachable. Treating both facts as one synchronous operation makes that gap difficult to recover from.
+
+The following is a design guide for billing orchestration, rather than a report of measured production results.
+
+## Model the lifecycle explicitly
+
+A useful starting state machine is:
+
+```text
+Payment initiated
+  → Payment pending
+  → Payment confirmed
+  → Provisioning pending
+  → Access active
+```
+
+Failure and retry states belong beside this path. A rejected payment must not lead to access activation; a provisioning timeout must not erase a confirmed payment.
+
+## Verify before granting access
+
+Correlate the provider transaction with the original request and subscriber account. Validate the amount, currency, expected merchant context, and final transaction status using the provider's supported verification mechanisms.
+
+Do not trust a browser redirect or an uncorrelated callback as proof of payment. Follow the current M-Pesa Daraja documentation for your integration environment and transaction type.
+
+## Make duplicate delivery harmless
+
+Callbacks and retries can repeat. Use a unique provider transaction identifier and enforce uniqueness in the database. Persist the payment record and provisioning intent in one database transaction where possible.
+
+```text
+BEGIN
+  record verified payment if not already recorded
+  create provisioning job if not already created
+COMMIT
+```
+
+A worker can then apply the intended access policy. Repeated execution should converge on the same subscriber state rather than creating a second entitlement.
+
+## Reconcile intended and actual state
+
+An API timeout does not tell you whether the router applied a change. Before retrying, read the current state and compare it with the intended plan. Track attempts and use bounded retries with backoff.
+
+An operator should be able to answer:
+
+- Which payment authorized this entitlement?
+- What policy should be active?
+- What was last observed on the network?
+- Which step needs attention?
+
+## Keep secrets and subscriber data contained
+
+Provider credentials belong on the server. Limit router management access, use protected connections supported by your equipment, and avoid including payment payloads or subscriber credentials in application logs.
+
+The result is a workflow that can explain and recover its state, even when payment confirmation and network provisioning happen at different times.
+
+## Follow one renewal through the records
+
+Suppose a subscriber requests a renewal for a specific plan. Before initiating the provider flow, the application creates a record that identifies the intended account, plan, amount, and request context. That record gives a later payment event something meaningful to match.
+
+The provider response may only establish that initiation succeeded. The subscriber interface can show a pending state while the server awaits a verifiable final outcome. This is different from promising that the subscriber is already connected.
+
+Once the final payment is verified, the application records what the transaction authorizes. A separate provisioning operation attempts to make the network agree with that entitlement. At each step, the support team should be able to identify which fact is established and which remains unresolved.
+
+```text
+Renewal request: subscriber + plan + expected amount
+Verified transaction: provider identity + final status
+Entitlement: access period + intended policy
+Provisioning attempt: requested change + observed result
+Session observation: connection state + observation time
+```
+
+These are related records, not interchangeable labels. A confirmed transaction should not disappear because a provisioning request failed, and a device timeout should not be misrepresented as proof that nothing changed.
+
+## Protect the transaction-to-job handoff
+
+A common failure window occurs when the application saves a payment and then crashes before scheduling provisioning. Reversing the order creates another risk: provisioning can begin before the durable payment record exists.
+
+A transactional outbox is one possible design. The application stores the verified payment and a provisioning intent in the same database transaction. A worker then processes the intent and records its progress. This does not remove every failure, but it makes the uncompleted work visible and recoverable.
+
+The worker needs its own correctness rules. A job may be delivered more than once, a process may stop after sending a device command, and another worker may attempt the same task. Define how work is claimed, how attempts are recorded, and how processing converges on the intended entitlement.
+
+This is an illustrative design pattern, not a claim that an outbox alone makes an entire billing system correct. The database constraints, worker behavior, device interface, and operational recovery procedures must agree.
+
+## Investigate a provisioning timeout without guessing
+
+Imagine that the device applied a new policy but the response was lost. The application sees a timeout. If it simply repeats a non-idempotent action, it can create a second effect or make the state harder to explain.
+
+The next safe step depends on the device operation. It may involve reading the current policy, comparing it with the intended entitlement, and applying a change only when the states differ. Some operations can be designed to set a target state; others require a more careful reconciliation procedure.
+
+Record an outcome such as “confirmation unavailable” when that is what the evidence supports. An operator needs to know that the result is uncertain rather than see an unjustified “not applied” status.
+
+## Give support a recovery workspace
+
+An effective support view connects the subscriber, transaction, entitlement, attempts, and last relevant network observation. It should explain why the workflow is waiting and what an authorized operator can do next.
+
+Useful controls might include requesting a fresh state check, retrying an eligible provisioning job, or escalating a conflicting record. The exact controls depend on the network and policy model. Manual intervention should preserve the operator identity and reason needed by the agreed review process.
+
+Keep raw credentials and unnecessary payment payloads out of that view. A transaction reference can support investigation without exposing every field returned by the provider. Decide which fields each support role actually needs.
+
+## Exercise the cases that create real uncertainty
+
+Prepare integration tests for a duplicated callback, an uncorrelated transaction, an incorrect amount, a delayed final outcome, an unreachable router, a timeout after an applied change, and a repeated provisioning job.
+
+For each case, ask:
+
+1. Which records remain authoritative?
+2. Can the subscriber receive an entitlement twice?
+3. What does the subscriber see?
+4. What can the support operator establish from the available evidence?
+5. What action can safely continue the workflow?
+
+The purpose is not to force every exception into an automatic retry. Some conditions deserve review. A well-designed workflow makes that boundary explicit and gives the team enough context to act responsibly.

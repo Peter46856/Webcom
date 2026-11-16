@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_BOOKING_URL: ${NEXT_PUBLIC_BOOKING_URL:-}
+    ports:
+      - '3000:3000'
+    environment:
+      JAVA_API_URL: http://api:8080
+      JAVA_API_TOKEN: ${WEBCOM_API_TOKEN:?Set WEBCOM_API_TOKEN}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      SUPABASE_URL: ${SUPABASE_URL:?Set SUPABASE_URL}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?Set SUPABASE_PUBLISHABLE_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      INQUIRY_EMAIL_FROM: ${INQUIRY_EMAIL_FROM:-}
+    depends_on:
+      - api
+  api:
+    build: ./backend
+    environment:
+      WEBCOM_API_TOKEN: ${WEBCOM_API_TOKEN:?Set WEBCOM_API_TOKEN}
+      SUPABASE_URL: ${SUPABASE_URL:?Set SUPABASE_URL}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:?Set SUPABASE_SECRET_KEY}
+    expose:
+      - '8080'

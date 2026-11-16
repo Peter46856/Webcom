@@ -1,0 +1,13 @@
+node_modules/
+.npm-cache/
+.next/
+out/
+.env*
+!.env.example
+backend/target/
+playwright-report/
+test-results/
+work/
+*.log
+*.tsbuildinfo
+.DS_Store

@@ -1,0 +1,34 @@
+reviewed_at: 2026-10-31
+scope: public website content and buyer journeys
+status: verified website snapshots; service outcomes and private systems not assessed
+benchmarks:
+  - name: Thoughtworks
+    type: technology consultancy benchmark
+    sources: [https://www.thoughtworks.com/]
+    observation: Distinct capabilities, working approach, client/industry, and insight navigation.
+    interpretation: WebCom needs clear paths for evaluating fit and delivery.
+  - name: Netguru
+    type: product and software development benchmark
+    sources: [https://www.netguru.com/services/product-discovery-services, https://www.netguru.com/]
+    observation: Discovery content covers fit, components, deliverables, decisions, and FAQs.
+    interpretation: Explain the outputs of discovery before asking for a build commitment.
+  - name: BairesDev
+    type: software delivery and staffing benchmark
+    sources:
+      [
+        https://www.bairesdev.com/software-development-services/software-outsourcing/,
+        https://www.bairesdev.com/,
+      ]
+    observation: Separate navigation and pages for delivery models, technologies, industries, and work.
+    interpretation: Connect services to practical engagement choices.
+  - name: Intellectsoft
+    type: software consulting benchmark
+    sources:
+      [https://www.intellectsoft.net/transportation-and-logistics, https://www.intellectsoft.net/]
+    observation: Dedicated logistics content and consultation routes support industry-focused discovery.
+    interpretation: Add industry-specific pages linked to relevant capabilities and cases.
+  - name: Andela
+    type: adjacent engineering and AI-services benchmark
+    sources: [https://www.andela.com/ai-solutions, https://www.andela.com/]
+    observation: Assessment, learning, managed delivery, and publication/research are distinct paths.
+    interpretation: Distinguish diagnosis from delivery without copying its AI positioning.

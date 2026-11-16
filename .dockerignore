@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.agents
+.npm-cache
+.env*
+backend/target
+work
+playwright-report
+test-results

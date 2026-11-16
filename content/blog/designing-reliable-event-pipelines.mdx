@@ -1,0 +1,107 @@
+When a dispatcher opens a fleet map, the dots look simple. Behind each dot is a chain of decisions: how a device reports a position, how an event gets stored, and what the interface should show when the signal goes quiet.
+
+A WebSocket is one part of that chain. It is a delivery mechanism, not a guarantee that the displayed position is current.
+
+## Separate the event from its delivery
+
+Give every position event a stable identity, a vehicle identifier, a device timestamp, and a server receipt timestamp. The two timestamps answer different questions: when was the observation made, and when did the system hear about it?
+
+```json
+{
+  "eventId": "position-unique-id",
+  "vehicleId": "vehicle-017",
+  "observedAt": "2026-01-15T10:00:00Z",
+  "receivedAt": "2026-01-15T10:00:02Z",
+  "latitude": -1.2864,
+  "longitude": 36.8172
+}
+```
+
+Persist events that matter to operational history before depending on a transient fan-out channel. A Redis publication can help distribute an update, but a subscriber that was disconnected needs another way to catch up.
+
+## Plan the reconnect path
+
+A client that reconnects should request a current snapshot and then resume incremental updates. Make the handoff explicit so events arriving during the snapshot do not create an invisible gap.
+
+- Keep a server sequence or cursor for resumable streams.
+- Deduplicate repeated events using their stable identity.
+- Reject impossible coordinates and validate device ownership.
+- Keep the newest observation by observation time, not just arrival order.
+
+An old event arriving late can still belong in route history. It should not move the live map marker backward.
+
+## Show freshness as part of the data
+
+“Connected” describes the browser connection. It says nothing about whether a vehicle has reported recently. Give dispatchers a visible last-observed time and a stale state appropriate to the operating environment.
+
+Do not hide uncertainty behind a green indicator. A vehicle with no recent position is a different operational condition from a vehicle that has stopped moving.
+
+## Make failure testable
+
+Before measuring map smoothness, test a disconnected client, a duplicated event, an out-of-order update, and a device with a drifting clock. These scenarios expose the contracts that make the system dependable.
+
+The design goal is a coherent operational picture: current where possible, historical where useful, and explicit about what the system does not know.
+
+## Walk through an out-of-order update
+
+Consider a vehicle that produces two observations. Observation A describes its position at 10:00:00. Observation B describes its position at 10:00:10. Connectivity delays A, so the server receives B first.
+
+A naive implementation updates the current-position record whenever a message arrives. When A eventually arrives, the vehicle appears to move back to an older position. The application has confused receipt order with observation order.
+
+Separate the decisions:
+
+1. Validate that the event comes from the expected device and contains an acceptable observation.
+2. Deduplicate using the event identity defined by the ingestion contract.
+3. Preserve a valid observation in the history needed by the application.
+4. Update the live position only when the event is newer under the agreed ordering rule.
+5. Publish a change that tells clients what state was actually accepted.
+
+Device time itself can be wrong. Define how clock drift, implausible future timestamps, and missing timestamps are handled. A source sequence may help when the device protocol provides a usable one; otherwise the system needs a documented policy for uncertainty. Do not assume that any single field solves every ordering problem.
+
+## Give the snapshot and stream a shared contract
+
+A reconnecting client often asks for a snapshot and then subscribes to updates. If those operations are independent, an event can occur after the snapshot was read but before the subscription becomes active. The client can miss a change without knowing it.
+
+One design option is a resumable event cursor. The snapshot identifies the stream position it represents, and the client resumes from that position. Another option is to subscribe first, buffer events, obtain a snapshot with an agreed watermark, and then apply events beyond that watermark. The right approach depends on how state and events are stored.
+
+The contract should answer four questions:
+
+- What exact state does the snapshot represent?
+- How does the client identify an update it has already applied?
+- What happens if the requested cursor has expired?
+- How does the client recover when it cannot prove continuity?
+
+A full resynchronization is often preferable to pretending that a partially reconstructed state is complete. The interface can show that it is refreshing rather than display stale certainty.
+
+## Model the visible state of a vehicle
+
+An operational interface benefits from more than a binary online indicator. It can distinguish a recent observation, an observation that has become stale, an unknown position, and a position that is present only in historical context.
+
+Choose freshness thresholds from the actual reporting interval and operating need. A vehicle that normally reports every few seconds has a different expected pattern from a device that reports on a scheduled interval. The application should also identify the observation time separately from the time the browser received an update.
+
+If a dispatcher selects an assignment, the vehicle state should remain connected to that task. Position, assignment status, and driver confirmation are different facts. Do not infer that a job was completed merely because a vehicle reached a coordinate unless that inference is explicitly part of the agreed workflow.
+
+## Test the pipeline as a sequence
+
+Unit tests for parsing are useful, but the important failures often involve a sequence of events. Prepare a small deterministic fixture that exercises the ingestion and presentation contract.
+
+```text
+Receive observation B
+  → B becomes the live position
+Receive delayed observation A
+  → A may enter history; B remains live
+Receive B again
+  → no duplicate business effect
+Disconnect the browser
+  → events continue to be processed
+Reconnect with an expired cursor
+  → request a new authoritative snapshot
+```
+
+Also test device identity mismatches, invalid coordinates, timestamp uncertainty, and a history-store failure. Decide which errors reject the observation, which retain it for review, and which should affect the operational health signal.
+
+## Define the evidence for a pilot
+
+Before a broader rollout, agree what the pilot should establish. Useful evidence might include correct stale-state presentation, recovery from a disconnected client, a traceable event history, and a demonstrated response to an out-of-order observation.
+
+Record the devices, reporting conditions, and workload used. A successful local demonstration does not establish the same behavior across every field network or fleet size. The next architecture decision should follow the evidence and its limits.
