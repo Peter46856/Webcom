@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { publishedProjects } from '@/lib/projects';
 import { PricingPreview } from '@/components/pricing-preview';
 import { PageGuide } from '@/components/page-guide';
@@ -18,7 +19,18 @@ import { CTA, TextLink } from '@/components/shared';
 import { services } from '@/lib/content';
 import { publishedPosts } from '@/lib/published-blog';
 import { BuyerPaths } from '@/components/buyer-paths';
-export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600; // Cache homepage HTML and refresh every hour
+
+export const metadata: Metadata = {
+  title: 'WebCom Engineering Studio — Custom Software & Network Infrastructure',
+  description:
+    'WebCom (webcom.website) is a software development and network infrastructure engineering studio building full-stack applications, logistics systems, APIs, and resilient deployments.',
+  alternates: {
+    canonical: '/',
+  },
+};
+
 export default async function Home() {
   const projects = await publishedProjects();
   const posts = (await publishedPosts()).slice(0, 2);
@@ -28,17 +40,16 @@ export default async function Home() {
         <div className="hero-copy">
           <div className="status-label">
             <span />
-            Software development & network infrastructure
+            WebCom Engineering Studio · Software & Infrastructure
           </div>
           <h1>
-            Complex systems.
+            Software & network infrastructure,
             <br />
-            Clear thinking.
-            <br />
-            Real impact.
+            engineered together.
           </h1>
           <p>
-            We engineer the software and infrastructure that keep your business moving. From your
+            Complex systems, clear thinking, real impact. WebCom builds the custom applications,
+            logistics platforms, and network infrastructure that keep your business moving—from your
             first API to your last-mile connection.
           </p>
           <div className="hero-actions">
