@@ -2,12 +2,21 @@ import { PageGuide } from '@/components/page-guide';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageIntro, CTA } from '@/components/shared';
+import { site } from '@/lib/site';
+
 export const metadata: Metadata = {
-  title: 'Engagement models',
+  title: 'Engagement Models — Discovery, Scoped Builds & Ongoing Operations',
   description:
     'Choose discovery, a scoped engineering build, or ongoing improvements. Understand deliverables, responsibilities, and proposal inputs.',
   alternates: { canonical: '/engagements' },
+  openGraph: {
+    title: `Engagement Models | ${site.name}`,
+    description:
+      'Choose discovery, a scoped engineering build, or ongoing improvements. Understand deliverables, responsibilities, and proposal inputs.',
+    url: '/engagements',
+  },
 };
+
 const models = [
   {
     name: 'Discovery & architecture',
@@ -49,6 +58,7 @@ const models = [
       'An ongoing agreement with explicit capacity, support hours, response expectations, and exclusions.',
   },
 ];
+
 export default function Engagements() {
   return (
     <>
@@ -58,7 +68,7 @@ export default function Engagements() {
         description="Different problems need different entry points. Choose a discovery engagement, a defined build, or a planned improvement relationship."
       />
       <div className="container section-bottom">
-        <Link className="button" href="/pricing">
+        <Link className="button" href="/pricing" prefetch={false}>
           Compare pricing and included features
         </Link>
       </div>
@@ -81,7 +91,7 @@ export default function Engagements() {
               <strong>What you can decide next</strong>
               <p>{model.decision}</p>
             </div>
-            <Link className="button button-ghost" href="/contact">
+            <Link className="button button-ghost" href="/contact" prefetch={false}>
               Discuss this engagement ↗
             </Link>
           </article>
@@ -108,7 +118,7 @@ export default function Engagements() {
             <li>Identify deadlines and the reason behind them</li>
             <li>Bring a budget range or ask us to scope the first step</li>
           </ul>
-          <Link className="text-link" href="/faq">
+          <Link className="text-link" href="/faq" prefetch={false}>
             Read common buyer questions ↗
           </Link>
         </aside>

@@ -3,10 +3,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { publishedPost } from '@/lib/published-blog';
+import { site } from '@/lib/site';
 import { Markdown } from '@/components/markdown';
 import { articleHeadings, headingId } from '@/lib/headings';
 import { CTA } from '@/components/shared';
-export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600; // Cache compiled MDX/Markdown articles and refresh every hour
+
 export async function generateMetadata({
   params,
 }: {
@@ -14,18 +17,56 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = await publishedPost(slug);
+  if (!post) return {};
+
   return {
-    title: post?.title,
-    description: post?.description,
+    title: post.title,
+    description: post.description,
     alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      title: `${post.title} | ${site.name}`,
+      description: post.description,
+      url: `/blog/${slug}`,
+      type: 'article',
+      authors: [site.name],
+    },
   };
 }
+
 export default async function Article({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await publishedPost(slug);
   if (!post) notFound();
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.description,
+    articleSection: post.category,
+    url: `${site.url}/blog/${slug}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${site.url}/blog/${slug}`,
+    },
+    author: {
+      '@type': 'Organization',
+      name: site.name,
+      url: site.url,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: site.name,
+      url: site.url,
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="article container">
         <div className="breadcrumb">
           <Link href="/blog">Engineering journal</Link>

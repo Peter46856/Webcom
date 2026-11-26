@@ -2,10 +2,20 @@ import { PageGuide } from '@/components/page-guide';
 import type { Metadata } from 'next';
 import { Code2, Network, Route, Cloud } from 'lucide-react';
 import { PageIntro, CTA } from '@/components/shared';
+
 export const metadata: Metadata = {
-  title: 'About the studio',
+  title: 'About Our Engineering Approach & Technical Stack',
+  description:
+    'Learn how WebCom Engineering Studio connects full-stack software development, logistics systems, ISP automation, and network infrastructure into resilient end-to-end architectures.',
   alternates: { canonical: '/about' },
+  openGraph: {
+    title: 'About Our Engineering Approach & Technical Stack | WebCom Engineering Studio',
+    description:
+      'WebCom Engineering Studio connects software development and network infrastructure—from Java, Next.js, and PostgreSQL to MikroTik, fiber, and cloud operations.',
+    url: '/about',
+  },
 };
+
 export default function About() {
   return (
     <>

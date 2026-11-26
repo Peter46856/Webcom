@@ -3,12 +3,21 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageIntro, CTA } from '@/components/shared';
 import { deliveryPhases } from '@/lib/buyer-content';
+import { site } from '@/lib/site';
+
 export const metadata: Metadata = {
-  title: 'How we work',
+  title: 'How We Work — Discovery, Architecture, Delivery & Handover',
   description:
     'WebCom delivery process: discovery, architecture, incremental development, validation, deployment, and operational handover.',
   alternates: { canonical: '/how-we-work' },
+  openGraph: {
+    title: `How We Work | ${site.name}`,
+    description:
+      'WebCom delivery process: discovery, architecture, incremental development, validation, deployment, and operational handover.',
+    url: '/how-we-work',
+  },
 };
+
 export default function Approach() {
   return (
     <>
@@ -54,7 +63,7 @@ export default function Approach() {
             <li>A decision maker for scope and acceptance</li>
             <li>A clear owner for production accounts and handover</li>
           </ul>
-          <Link className="text-link" href="/engagements">
+          <Link className="text-link" href="/engagements" prefetch={false}>
             Find the right engagement ↗
           </Link>
         </aside>

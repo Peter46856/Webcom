@@ -32,8 +32,12 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const projects = await publishedProjects();
-  const posts = (await publishedPosts()).slice(0, 2);
+  const [projects, allPosts] = await Promise.all([
+    publishedProjects(),
+    publishedPosts(),
+  ]);
+  const posts = allPosts.slice(0, 2);
+
   return (
     <>
       <section className="hero container">
@@ -110,7 +114,12 @@ export default async function Home() {
         </div>
         <div className="services-grid">
           {services.map((service) => (
-            <Link className="service-card" href={`/services/${service.slug}`} key={service.slug}>
+            <Link
+              className="service-card"
+              href={`/services/${service.slug}`}
+              key={service.slug}
+              prefetch={false}
+            >
               <div className="service-card-top">
                 <span className="icon-box">
                   <ServiceIcon name={service.icon} />
@@ -219,7 +228,12 @@ export default async function Home() {
         </div>
         <div className="journal-grid">
           {posts.map((post) => (
-            <Link className="journal-card" href={`/blog/${post.slug}`} key={post.slug}>
+            <Link
+              className="journal-card"
+              href={`/blog/${post.slug}`}
+              key={post.slug}
+              prefetch={false}
+            >
               <div className="article-meta">
                 <span>{post.category}</span>
                 <span>{post.readingTime} min read</span>

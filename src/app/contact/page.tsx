@@ -3,13 +3,23 @@ import type { Metadata } from 'next';
 import { ArrowUpRight, MessageSquare, FileText, Compass } from 'lucide-react';
 import { PageIntro } from '@/components/shared';
 import { ContactForm } from '@/components/contact-form';
-import { bookingUrl } from '@/lib/site';
+import { bookingUrl, site } from '@/lib/site';
 import { publishedPricing } from '@/lib/pricing';
 import { packagePrice } from '@/lib/pricing-schema';
+
 export const metadata: Metadata = {
-  title: 'Start a project',
+  title: 'Start a Software or Infrastructure Project',
+  description:
+    'Get in touch with WebCom Engineering Studio to scope custom software platforms, logistics systems, network infrastructure, or cloud engineering projects.',
   alternates: { canonical: '/contact' },
+  openGraph: {
+    title: `Start a Project | ${site.name}`,
+    description:
+      'A new product, a complex integration, or infrastructure that needs a better foundation. Tell us where you want to go.',
+    url: '/contact',
+  },
 };
+
 export default async function Contact({
   searchParams,
 }: {
@@ -23,6 +33,7 @@ export default async function Contact({
     ? `I am interested in the ${selectedPackage.name} package (${packagePrice(selectedPackage)} ${selectedPackage.currency} per ${selectedPackage.billing}, indicative).\n\nMy project goals are: `
     : '';
   const booking = bookingUrl();
+
   return (
     <>
       <PageIntro

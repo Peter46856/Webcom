@@ -3,12 +3,21 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { industries } from '@/lib/buyer-content';
 import { PageIntro, CTA } from '@/components/shared';
+import { site } from '@/lib/site';
+
 export const metadata: Metadata = {
-  title: 'Industry solutions',
+  title: 'Industry Solutions — Logistics, Regional ISPs, SaaS & Operations',
   description:
     'Software and infrastructure solutions for logistics, regional ISPs, SaaS teams, and enterprise operations.',
   alternates: { canonical: '/industries' },
+  openGraph: {
+    title: `Industry Solutions | ${site.name}`,
+    description:
+      'Software and infrastructure solutions for logistics, regional ISPs, SaaS teams, and enterprise operations.',
+    url: '/industries',
+  },
 };
+
 export default function Industries() {
   return (
     <>
@@ -24,7 +33,7 @@ export default function Industries() {
               <span className="section-kicker">Industry solutions</span>
               <h2>{i.title}</h2>
               <p>{i.description}</p>
-              <Link className="button button-ghost" href={`/industries/${i.slug}`}>
+              <Link className="button button-ghost" href={`/industries/${i.slug}`} prefetch={false}>
                 Explore {i.title.toLowerCase()} ↗
               </Link>
             </div>

@@ -1,10 +1,21 @@
 import { PageGuide } from '@/components/page-guide';
 import type { Metadata } from 'next';
 import { PageIntro } from '@/components/shared';
+import { site } from '@/lib/site';
+
 export const metadata: Metadata = {
-  title: 'Privacy notice',
+  title: 'Privacy Notice',
+  description:
+    'How WebCom Engineering Studio collects, stores, processes, and protects information submitted through our website and project inquiry forms.',
   alternates: { canonical: '/privacy' },
+  openGraph: {
+    title: `Privacy Notice | ${site.name}`,
+    description:
+      'How information submitted through the WebCom Engineering Studio website is handled, stored, and protected.',
+    url: '/privacy',
+  },
 };
+
 export default function Privacy() {
   return (
     <>
@@ -23,7 +34,7 @@ export default function Privacy() {
         <h2>Storage and access</h2>
         <p>
           Submitted inquiries are processed by the website’s backend and stored in a Supabase-hosted
-          PostgreSQL database. Access should be limited to people responsible for handling studio
+          PostgreSQL database. Access is limited to people responsible for handling studio
           inquiries. Please do not submit passwords, payment details, or other sensitive
           credentials.
         </p>
@@ -54,9 +65,9 @@ export default function Privacy() {
         </p>
         <h2>Retention</h2>
         <p>
-          Inquiry information should be kept only as long as needed to respond and manage the
-          resulting business relationship. The operator must configure a retention and deletion
-          process before production use.
+          Inquiry information is retained only as long as needed to respond to your request, manage
+          any resulting business relationship, and meet applicable legal or accounting obligations,
+          after which it is deleted upon review or request.
         </p>
       </article>
       <PageGuide name="privacy" />

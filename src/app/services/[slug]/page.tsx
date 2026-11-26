@@ -3,12 +3,16 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Check } from 'lucide-react';
 import { services } from '@/lib/content';
+import { site } from '@/lib/site';
 import { PageIntro, CTA } from '@/components/shared';
 import { ServiceDepth } from '@/components/service-depth';
+
 export const dynamicParams = false;
+
 export function generateStaticParams() {
   return services.map(({ slug }) => ({ slug }));
 }
+
 export async function generateMetadata({
   params,
 }: {
@@ -16,18 +20,45 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const service = services.find((item) => item.slug === slug);
+  if (!service) return {};
+
   return {
-    title: service?.title,
-    description: service?.description,
+    title: `${service.title} Services`,
+    description: service.description,
     alternates: { canonical: `/services/${slug}` },
+    openGraph: {
+      title: `${service.title} | ${site.name}`,
+      description: service.description,
+      url: `/services/${slug}`,
+      type: 'website',
+    },
   };
 }
+
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const service = services.find((item) => item.slug === slug);
   if (!service) notFound();
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.title,
+    description: service.description,
+    url: `${site.url}/services/${slug}`,
+    provider: {
+      '@type': 'ProfessionalService',
+      name: site.name,
+      url: site.url,
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageIntro
         label={`Services / ${service.title}`}
         title={service.short}

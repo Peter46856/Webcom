@@ -3,11 +3,22 @@ import type { Metadata } from 'next';
 import { PageIntro, CTA } from '@/components/shared';
 import { BlogList } from '@/components/blog-list';
 import { publishedPosts } from '@/lib/published-blog';
-export const dynamic = 'force-dynamic';
+
+export const revalidate = 3600; // Cache blog index and refresh every hour
+
 export const metadata: Metadata = {
-  title: 'Engineering journal',
+  title: 'Engineering Journal — Software, Logistics & Network Architecture',
+  description:
+    'Read engineering guides, architectural tradeoffs, and practical insights on custom software systems, logistics platforms, and network infrastructure from WebCom Engineering Studio.',
   alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'Engineering Journal | WebCom Engineering Studio',
+    description:
+      'Notes from inside the system: engineering guides, architectural tradeoffs, and practical thinking across software, logistics, and networks.',
+    url: '/blog',
+  },
 };
+
 export default async function Blog() {
   const posts = await publishedPosts();
   return (

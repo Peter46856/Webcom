@@ -3,17 +3,71 @@ import Link from 'next/link';
 import { PageIntro, CTA } from '@/components/shared';
 import { PricingCatalog } from '@/components/pricing-catalog';
 import { publishedPricing } from '@/lib/pricing';
-export const dynamic = 'force-dynamic';
+import { site } from '@/lib/site';
+
+export const revalidate = 3600; // Cache pricing catalog and refresh every hour
+
 export const metadata: Metadata = {
-  title: 'Pricing & packages',
+  title: 'Pricing & Engineering Packages',
   description:
     'Feature-based planning ranges for websites, custom software, fleet platforms, ISP automation, cloud engineering, and ongoing support.',
   alternates: { canonical: '/pricing' },
+  openGraph: {
+    title: `Pricing & Engineering Packages | ${site.name}`,
+    description:
+      'Feature-based planning ranges for websites, custom software, fleet platforms, ISP automation, cloud engineering, and ongoing support.',
+    url: '/pricing',
+  },
 };
+
 export default async function Pricing() {
   const { packages, unavailable } = await publishedPricing();
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What if I do not know which features I need?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Start with the business problem: who uses the system, what they need to accomplish, and where the current process breaks down. We can help narrow a first release or recommend discovery before a build.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Are hosting, hardware, and transaction charges included?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. Domains, cloud hosting, email delivery, map APIs, payment fees, software licenses, network hardware, travel, and physical installation are separate unless explicitly included in your proposal.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I combine services or change requirements?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. A fleet platform may need cloud setup, or an ISP portal may need a public website. We quote overlapping work once in a combined scope.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does choosing a package reserve work or require payment?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'No. The package button opens an inquiry with that package as context. No checkout, reservation, or contract is created. The final proposal governs pricing and delivery.',
+        },
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <PageIntro
         label="Pricing & packages"
         title="A clearer starting point for your budget."

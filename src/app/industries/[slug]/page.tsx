@@ -3,30 +3,62 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { industries } from '@/lib/buyer-content';
+import { site } from '@/lib/site';
 import { PageIntro, CTA } from '@/components/shared';
+
 export const dynamicParams = false;
+
 export function generateStaticParams() {
   return industries.map((i) => ({ slug: i.slug }));
 }
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const i = industries.find((i) => i.slug === slug);
+  const i = industries.find((item) => item.slug === slug);
+  if (!i) return {};
+
   return {
-    title: i?.title,
-    description: i?.description,
+    title: `${i.title} — Software & Infrastructure Solutions`,
+    description: i.description,
     alternates: { canonical: `/industries/${slug}` },
+    openGraph: {
+      title: `${i.title} | ${site.name}`,
+      description: i.description,
+      url: `/industries/${slug}`,
+      type: 'website',
+    },
   };
 }
+
 export default async function Industry({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const i = industries.find((i) => i.slug === slug);
+  const i = industries.find((item) => item.slug === slug);
   if (!i) notFound();
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `${i.title} Engineering Solutions`,
+    description: i.description,
+    url: `${site.url}/industries/${slug}`,
+    areaServed: i.title,
+    provider: {
+      '@type': 'ProfessionalService',
+      name: site.name,
+      url: site.url,
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageIntro label={`Industries / ${i.title}`} title={i.headline} description={i.description} />
       <section className="container section-bottom">
         <div className="section-heading">
@@ -51,7 +83,7 @@ export default async function Industry({ params }: { params: Promise<{ slug: str
               <span className="section-kicker">What we can build</span>
               <h2>Connected capabilities.</h2>
             </div>
-            <Link className="text-link" href={`/services/${i.service}`}>
+            <Link className="text-link" href={`/services/${i.service}`} prefetch={false}>
               Explore the engineering service ↗
             </Link>
           </div>
@@ -81,7 +113,7 @@ export default async function Industry({ params }: { params: Promise<{ slug: str
             Explore the component responsibilities, data flow, and implementation context behind a
             relevant WebCom project.
           </p>
-          <Link className="text-link" href={`/projects/${i.project}`}>
+          <Link className="text-link" href={`/projects/${i.project}`} prefetch={false}>
             Read the architecture story ↗
           </Link>
           <hr />
@@ -90,7 +122,7 @@ export default async function Industry({ params }: { params: Promise<{ slug: str
             We agree integrations, acceptance criteria, dependencies, and handover needs before a
             delivery plan is finalized.
           </p>
-          <Link className="text-link" href="/engagements">
+          <Link className="text-link" href="/engagements" prefetch={false}>
             Compare engagement models ↗
           </Link>
         </aside>

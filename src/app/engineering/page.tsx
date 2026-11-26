@@ -2,12 +2,21 @@ import { PageGuide } from '@/components/page-guide';
 import type { Metadata } from 'next';
 import { PageIntro, CTA } from '@/components/shared';
 import { Architecture } from '@/components/architecture';
+import { site } from '@/lib/site';
+
 export const metadata: Metadata = {
-  title: 'Engineering standards',
+  title: 'Engineering Standards — Architecture, Reliability & Deployment',
   description:
     'How WebCom approaches architecture, access controls, integration reliability, quality, deployment, and handover.',
   alternates: { canonical: '/engineering' },
+  openGraph: {
+    title: `Engineering Standards | ${site.name}`,
+    description:
+      'How WebCom approaches architecture, access controls, integration reliability, quality, deployment, and handover.',
+    url: '/engineering',
+  },
 };
+
 const standards = [
   [
     'Architecture with a reason',
@@ -34,6 +43,7 @@ const standards = [
     'Keep architecture decisions, API contracts, deployment steps, known limitations, and operational procedures near the code. Agree the scope of future support rather than leaving it implicit.',
   ],
 ];
+
 export default function Engineering() {
   return (
     <>
