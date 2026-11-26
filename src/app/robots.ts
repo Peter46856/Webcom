@@ -1,16 +1,21 @@
-const configuredUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : '');
+import type { MetadataRoute } from 'next';
+import { site } from '@/lib/site';
 
-const isProduction = process.env.NODE_ENV === 'production';
+export default function robots(): MetadataRoute.Robots {
+  const baseUrl =
+    site.url && !site.url.includes('localhost')
+      ? site.url.replace(/\/$/, '')
+      : 'https://www.webcom.website';
 
-export const site = {
-  // ...keep all your existing fields here...
-  url:
-    isProduction && (!configuredUrl || configuredUrl.includes('localhost'))
-      ? 'https://www.webcom.website'
-      : configuredUrl || 'http://localhost:3000',
-};
+  return {
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/api/', '/admin', '/admin/'],
+      },
+    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
+  };
+}
